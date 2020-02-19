@@ -15,13 +15,13 @@ using System.Threading.Tasks;
 using Akka.Actor;
 using Akka.Actor.Internal;
 using Akka.Annotations;
-using Akka.Configuration;
 using Akka.Event;
 using Akka.Pattern;
 using Akka.Remote.Transport;
 using Akka.Util;
 using Akka.Util.Internal;
 using DotNetty.Transport.Channels;
+using Hocon;
 
 namespace Akka.Remote.TestKit
 {
@@ -139,10 +139,10 @@ namespace Akka.Remote.TestKit
                     // of a failed operation
                     var result = _client.Ask(new ToServer<EnterBarrier>(new EnterBarrier(name, barrierTimeout)), askTimeout).Result;
                 }
-                catch (AggregateException)
+                catch (AggregateException ex)
                 {
                     _client.Tell(new ToServer<FailBarrier>(new FailBarrier(name)));
-                    throw new TimeoutException("Client timed out while waiting for barrier " + name);
+                    throw new TimeoutException("Client timed out while waiting for barrier " + name, ex);
                 }
                 catch (OperationCanceledException)
                 {
